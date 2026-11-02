@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>web-touristKG — Природа Кыргызстана</title>
+<meta name="description" content="Природа, история и легенды Кыргызстана: туры, паспорт путешественника, события и помощник Барс.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/mascot.css">
+<link rel="stylesheet" href="css/vibe.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip</a>
+
+<header class="nav" id="navbar">
+  <a class="brand" href="#top"><img id="logoImg" alt=""><span id="logoTx"></span></a>
+  <nav id="nav" class="links" aria-label="Main"></nav>
+  <div class="nav-r">
+    <select id="lng" class="lng" aria-label="Language">
+      <option value="ru">RU</option><option value="en">EN</option><option value="zh">中文</option><option value="es">ES</option>
+    </select>
+    <button class="ico-btn" id="favBtn" type="button" aria-label="Favorites"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-8-5.6-8-11.2A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 8 2.8C20 15.4 12 21 12 21Z"/></svg><b id="favN" hidden>0</b></button>
+    <a class="btn small" id="topCta" href="#plan"></a>
+    <button class="ico-btn burger" id="burger" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+  </div>
+</header>
+
+<main id="main"></main>
+<footer class="foot" id="foot"></footer>
+
+<!-- общее окно (легенды, туры, области) -->
+<div class="modal" id="modal" hidden>
+  <div class="m-back" data-act="mclose"></div>
+  <div class="m-box" role="dialog" aria-modal="true"><button class="m-x" type="button" data-act="mclose" id="mx">×</button><div id="mBody"></div></div>
+</div>
+
+<!-- избранное -->
+<aside class="drawer" id="drawer" hidden>
+  <div class="m-back" data-act="dclose"></div>
+  <div class="d-box"><div class="d-h"><h3 id="dTitle"></h3><button class="m-x pos" type="button" data-act="dclose">×</button></div><div id="dBody"></div></div>
+</aside>
+
+<!-- Барс: кнопка и чат -->
+<div class="bubble-hello" id="bHello" hidden></div>
+<button class="bb" id="bb" type="button" aria-label="Bars"><span id="bbMasc"></span></button>
+<section class="chat" id="chat" hidden aria-label="Bars">
+  <div class="c-h"><span class="c-av" id="chMasc"></span><b id="chName"></b><button class="m-x pos" type="button" data-act="cclose">×</button></div>
+  <div class="c-log" id="cLog" aria-live="polite"></div>
+  <div class="c-q" id="cQ"></div>
+  <form class="c-fm" id="cForm"><input id="cIn" autocomplete="off"><button class="btn small" type="submit">→</button></form>
+</section>
+
+<script src="js/config.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/i18n2.js"></script>
+<script src="data/content.js"></script>
+<script src="data/map-data.js"></script>
+<script src="js/mascot.js"></script>
+<script src="js/store.js"></script>
+<script src="js/app.js"></script>
+<script src="js/explore.js"></script>
+<script src="js/play.js"></script>
+<script src="js/contact.js"></script>
+<script src="js/bot.js"></script>
+  <script src="js/company.js"></script>
+<script>WT.start();</script>
+</body>
+</html>

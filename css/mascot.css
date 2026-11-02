@@ -1,0 +1,103 @@
+/* Анимации Барса */
+.bars{width:100%;height:100%;display:flex;justify-content:center;align-items:flex-end}
+.b-stage{position:relative;height:100%;max-width:100%;aspect-ratio:420/1081}.b-stage.face{aspect-ratio:360/435}
+.b-all{position:absolute;inset:0;transform-origin:50% 100%}
+.b-all img{position:absolute;inset:0;width:100%;height:100%;user-select:none;-webkit-user-drag:none;pointer-events:none}
+.b-head{position:absolute;inset:0;transform-origin:50% 40%}
+.b-body{transform-origin:50% 100%}
+.is-face .b-all{transform-origin:50% 90%}
+.lid{position:absolute;top:24.2%;width:17.5%;height:5.6%;border-radius:50%;background:radial-gradient(ellipse at 50% 35%,#f3eee6 60%,#e4ddd2);box-shadow:inset 0 -3px 0 -1px #3a2a2a;transform:scaleY(0);transform-origin:50% 0}
+.lid.l{left:24.5%}.lid.r{left:58.5%}
+.fx{position:absolute;display:none;pointer-events:none}
+.fx-dots{top:2%;right:6%;gap:4%;display:none;align-items:flex-end}.fx-dots i{display:block;width:11px;height:11px;border-radius:50%;background:#1b9aaa;margin-left:5px}.fx-dots i:nth-child(2){width:15px;height:15px}.fx-dots i:nth-child(3){width:20px;height:20px}
+.fx-spark{width:60%;left:20%;top:-2%}.fx-wave{width:24%;right:-6%;top:42%}.fx-sound{width:18%;left:68%;top:20%}.fx-sweat{width:11%;left:66%;top:15%}
+
+/* idle: дышит, голова чуть покачивается, моргает */
+.bars .b-body{animation:breathe 3.6s ease-in-out infinite}
+.bars .b-head,.bars .b-faceimg{animation:headbob 3.6s ease-in-out infinite}
+.bars .lid{animation:blink 5s infinite}
+@keyframes breathe{50%{transform:scaleY(1.012)}}
+@keyframes headbob{50%{transform:translateY(-.7%) rotate(-.8deg)}}
+@keyframes blink{0%,92%,100%{transform:scaleY(0)}95%{transform:scaleY(1)}}
+
+/* wave: приветствует, покачивается */
+.s-wave .b-all{animation:sway 1.1s ease-in-out infinite alternate}
+.s-wave .b-head,.s-wave .b-faceimg{animation:headtilt 1.1s ease-in-out infinite alternate}
+.s-wave .fx-wave{display:block;animation:waveFx .7s ease-in-out infinite alternate}
+@keyframes sway{from{transform:rotate(-2.4deg)}to{transform:rotate(2.4deg)}}
+@keyframes headtilt{from{transform:rotate(-4deg)}to{transform:rotate(5deg)}}
+@keyframes waveFx{from{transform:rotate(-14deg);opacity:.5}to{transform:rotate(12deg);opacity:1}}
+
+/* think: наклонил голову, «...» над головой */
+.s-think .b-head,.s-think .b-faceimg{animation:think 2.2s ease-in-out infinite}
+.s-think .lid{animation:none}
+.s-think .fx-dots{display:flex}.s-think .fx-dots i{animation:dotb 1.1s infinite}.s-think .fx-dots i:nth-child(2){animation-delay:.18s}.s-think .fx-dots i:nth-child(3){animation-delay:.36s}
+@keyframes think{0%,100%{transform:rotate(-7deg) translateY(-.5%)}50%{transform:rotate(-9deg) translateY(-1%)}}
+@keyframes dotb{0%,100%{opacity:.3;transform:translateY(0)}50%{opacity:1;transform:translateY(-6px)}}
+
+/* talk: кивает, от рта идут волны */
+.s-talk .b-head,.s-talk .b-faceimg{animation:talk .55s ease-in-out infinite alternate}
+.s-talk .b-body{animation:talkb .55s ease-in-out infinite alternate}
+.s-talk .fx-sound{display:block;animation:waveFx .45s ease-in-out infinite alternate}
+@keyframes talk{from{transform:translateY(0) rotate(-1.5deg)}to{transform:translateY(1.4%) rotate(1.5deg) scale(1.01)}}
+@keyframes talkb{to{transform:scaleY(.992)}}
+
+/* happy: прыгает, искорки */
+.s-happy .b-all{animation:hop .55s ease-in-out 3}
+.s-happy .b-head,.s-happy .b-faceimg{animation:headtilt .55s ease-in-out infinite alternate}
+.s-happy .fx-spark{display:block;animation:spark .8s ease-in-out infinite alternate}
+@keyframes hop{50%{transform:translateY(-6%) scale(1.02,.99)}}
+@keyframes spark{from{opacity:.4;transform:scale(.92) rotate(-4deg)}to{opacity:1;transform:scale(1.06) rotate(4deg)}}
+
+/* oops: смутился */
+.s-oops .b-head,.s-oops .b-faceimg{animation:none;transform:rotate(7deg) translateY(2%)}
+.s-oops .b-body{animation:none;transform:scaleY(.985)}
+.s-oops .fx-sweat{display:block;animation:sweat 1.2s ease-in infinite}
+@keyframes sweat{from{transform:translateY(-6px);opacity:0}30%{opacity:1}to{transform:translateY(12px);opacity:.2}}
+
+@media(prefers-reduced-motion:reduce){.bars *{animation:none!important}}
+
+.b-all img.b-arm{inset:auto;left:73.81%;top:41.63%;width:26.19%;height:31.9%;transform-origin:4.5% 8.7%}
+.s-wave .b-arml{animation:armUpL .45s ease-out forwards,armWaveL .5s ease-in-out .45s infinite alternate}
+@keyframes armUp{from{transform:rotate(0)}to{transform:rotate(-135deg)}}
+@keyframes armWave{from{transform:rotate(-120deg)}to{transform:rotate(-152deg)}}
+.s-happy .b-arml{animation:armCheerL .4s ease-in-out infinite alternate}
+@keyframes armCheer{from{transform:rotate(-100deg)}to{transform:rotate(-140deg)}}
+.is-face .b-arm{display:none}
+
+/* левая рука и мимика */
+.b-all img.b-arml{left:0;transform-origin:91% 8.7%}
+.s-wave .b-arml{animation:armUpL .45s ease-out forwards,armWaveL .5s ease-in-out .45s infinite alternate}
+.b-all img.b-fo{display:none;inset:auto;top:55.5%;width:26.19%;height:18.04%;opacity:0}
+.b-all img.b-for{left:73.81%;top:50.5%;transform-origin:42.7% 0}
+.b-all img.b-fol{left:8.57%;top:52.7%;transform-origin:58.2% 0}
+.s-think .b-arm{-webkit-mask-image:linear-gradient(#000 38%,transparent 50%);mask-image:linear-gradient(#000 38%,transparent 50%)}
+.s-think .b-all img.b-fo{display:block}
+.s-think .b-for{animation:foR .6s ease-out forwards,foRb 2.4s ease-in-out .6s infinite}
+.s-think .b-fol{animation:foL .6s ease-out forwards}
+@keyframes foR{from{transform:rotate(20deg);opacity:0}to{transform:rotate(129deg) scale(1.12);opacity:1}}
+@keyframes foRb{0%,100%{transform:rotate(129deg) scale(1.12)}50%{transform:rotate(126deg) scale(1.12)}}
+@keyframes foL{from{transform:rotate(0);opacity:0}to{transform:rotate(-88deg) scale(1.25);opacity:1}}
+.brow{position:absolute;top:21.8%;width:14%;height:1.3%;border-radius:4px;background:#4a3836;opacity:0;transition:opacity .25s,transform .25s}
+.brow.l{left:25.5%}.brow.r{left:59%}
+.s-think .brow,.s-oops .brow,.s-happy .brow,.s-talk .brow{opacity:.85}
+.s-think .brow.l{transform:translateY(-4px) rotate(-10deg)}.s-think .brow.r{transform:translateY(2px) rotate(-4deg)}
+.s-oops .brow.l{transform:rotate(14deg)}.s-oops .brow.r{transform:rotate(-14deg)}
+.s-happy .brow{transform:translateY(-4px)}
+.s-talk .brow{animation:browT .9s ease-in-out infinite alternate}
+@keyframes browT{from{transform:translateY(0)}to{transform:translateY(-3px)}}
+.s-think .lid{transform:scaleY(.45);animation:none}
+.mouth{position:absolute;left:38.2%;top:33%;width:23.8%;height:5.1%;border-radius:48% 48% 55% 55%/38% 38% 62% 62%;background:radial-gradient(ellipse at 50% 45%,#ebe3da 60%,#e2d8ce 85%,rgba(226,216,206,0));filter:blur(.6px);transform-origin:50% 0;transform:scaleY(0);pointer-events:none}
+.mouth:after{content:"";position:absolute;left:30%;right:30%;top:42%;height:30%;border-bottom:2.5px solid #7a5a52;border-radius:0 0 50% 50%;opacity:0}
+.s-think .mouth,.s-oops .mouth{transform:scaleY(1)}
+.s-think .mouth:after{opacity:.9;left:38%;right:38%;height:0;border-bottom-width:2.5px;border-radius:0}
+.s-oops .mouth:after{opacity:.9;border-bottom:0;border-top:2.5px solid #7a5a52;border-radius:50% 50% 0 0;top:50%}
+.s-talk .mouth,.s-wave .mouth{animation:mouthT .62s ease-in-out infinite}
+.s-talk .mouth:after,.s-wave .mouth:after{opacity:0}
+@keyframes mouthT{0%{transform:scaleY(.1)}20%{transform:scaleY(.75)}40%{transform:scaleY(.3)}65%{transform:scaleY(.9)}85%{transform:scaleY(.2)}100%{transform:scaleY(.1)}}
+.is-face .brow,.is-face .mouth,.is-face .b-fo{display:none}
+.sal{font:800 1.9rem var(--serif,serif);margin:0;color:#0b233a}
+
+@keyframes armUpL{from{transform:rotate(0)}to{transform:rotate(135deg)}}
+@keyframes armWaveL{from{transform:rotate(120deg)}to{transform:rotate(152deg)}}
+@keyframes armCheerL{from{transform:rotate(100deg)}to{transform:rotate(140deg)}}
