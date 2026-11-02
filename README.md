@@ -1,5 +1,7 @@
 # web-touristKG — Природа Кыргызстана (версия 3)
 
+https://docs.google.com/document/d/13QmrWJq2FVxVwPliUuAPTQYpO4FhzEO8/edit?usp=sharing&ouid=116369383485557341937&rtpof=true&sd=true ТЗ
+
 Чистый HTML/CSS/JS, без сборки. 4 языка: RU / EN / 中文 / ES.
 
 ## Запуск
