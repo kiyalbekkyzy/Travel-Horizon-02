@@ -4,6 +4,11 @@ https://docs.google.com/document/d/13QmrWJq2FVxVwPliUuAPTQYpO4FhzEO8/edit?usp=sh
 
 Чистый HTML/CSS/JS, без сборки. 4 языка: RU / EN / 中文 / ES.
 
+## Ссылки
+- 🌐 Сайт: https://kiyalbekkyzy.github.io/Travel-Horizon-02/
+- 📘 Swagger (описание API): https://kiyalbekkyzy.github.io/Travel-Horizon-02/docs/swagger.html
+- Файл для Swagger UI / Postman: [`docs/openapi.yaml`](docs/openapi.yaml)
+
 ## Запуск
 VS Code → Live Server → `index.html`. Админка: `admin.html` (демо-пароль `admin`). В демо данные лежат в браузере, сайт и админку открывайте в одном.
 
