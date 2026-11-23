@@ -1,0 +1,22 @@
+# Конфиг бэкенда (Cloudflare Worker + KV). Деплой: `npx wrangler deploy` или авто-деплой из GitHub (Workers Builds).
+name = "kyrgyz-trails-api"
+main = "worker/worker.js"
+compatibility_date = "2025-01-01"
+workers_dev = true
+
+# Хранилище данных (заявки, контент, отзывы, дневники, статистика, фото).
+# id не указан: Wrangler создаст KV сам при первом деплое и привяжет под именем DB.
+[[kv_namespaces]]
+binding = "DB"
+
+# Автоперевод в админке (Workers AI, есть бесплатный лимит).
+[ai]
+binding = "AI"
+
+[vars]
+# Адрес сайта на GitHub Pages (только домен, без пути). Для тестов можно "*".
+ALLOWED_ORIGIN = "https://kiyalbekkyzy.github.io"
+
+# Секреты НЕ хранятся в репозитории. Задаются в Cloudflare: Worker → Settings → Variables and Secrets:
+#   ADMIN_PASSWORD — пароль админки
+#   BOT_TOKEN, CHAT_ID — Telegram-бот для уведомлений о заявках (необязательно)

@@ -9,6 +9,13 @@ https://docs.google.com/document/d/13QmrWJq2FVxVwPliUuAPTQYpO4FhzEO8/edit?usp=sh
 - 📘 Swagger (описание API): https://kiyalbekkyzy.github.io/Travel-Horizon-02/docs/swagger.html
 - Файл для Swagger UI / Postman: [`docs/openapi.yaml`](docs/openapi.yaml)
 
+## Бэкенд (Cloudflare Worker + KV, бесплатно)
+Конфиг — `wrangler.toml`, код — `worker/worker.js`, описание API — `docs/openapi.yaml`.
+1. Cloudflare → Workers & Pages → Create → **Import a repository** → выбрать этот репозиторий (Build command пусто, Deploy command `npx wrangler deploy`).
+2. KV-хранилище `DB` создаётся автоматически при деплое.
+3. Worker → Settings → Variables and Secrets: добавить секрет `ADMIN_PASSWORD` (и `BOT_TOKEN`, `CHAT_ID` для Telegram).
+4. Адрес Worker (`https://kyrgyz-trails-api.<поддомен>.workers.dev`) вписать в `js/config.js` → `API_URL`.
+
 ## Запуск
 VS Code → Live Server → `index.html`. Админка: `admin.html` (демо-пароль `admin`). В демо данные лежат в браузере, сайт и админку открывайте в одном.
 
