@@ -3,6 +3,8 @@ name = "kyrgyz-trails-api"
 main = "worker/worker.js"
 compatibility_date = "2025-01-01"
 workers_dev = true
+# Не стирать переменные и секреты, заданные в панели Cloudflare (ADMIN_PASSWORD и др.) при деплое.
+keep_vars = true
 
 # Хранилище данных (заявки, контент, отзывы, дневники, статистика, фото).
 # id не указан: Wrangler создаст KV сам при первом деплое и привяжет под именем DB.
