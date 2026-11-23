@@ -6,7 +6,7 @@ info:
     Сервер сайта турфирмы — Cloudflare Worker `worker/worker.js` + хранилище KV.
     Админ-методы требуют заголовок `X-Admin-Password`, методы путешественника — заголовок `X-Token`.
 servers:
-  - url: https://YOUR-WORKER.workers.dev
+  - url: https://kyrgyz-trails-api.jijiwq01.workers.dev
     description: Адрес вашего Worker (его же вписывают в js/config.js → API_URL)
 tags:
   - name: Leads
