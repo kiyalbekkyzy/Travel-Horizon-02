@@ -7,6 +7,7 @@ https://docs.google.com/document/d/13QmrWJq2FVxVwPliUuAPTQYpO4FhzEO8/edit?usp=sh
 ## Ссылки
 - 🌐 Сайт: https://kiyalbekkyzy.github.io/Travel-Horizon-02/
 - 📘 Swagger (описание API): https://kiyalbekkyzy.github.io/Travel-Horizon-02/docs/swagger.html
+- ⚙️ API (Cloudflare Worker): https://kyrgyz-trails-api.jijiwq01.workers.dev
 - Файл для Swagger UI / Postman: [`docs/openapi.yaml`](docs/openapi.yaml)
 
 ## Бэкенд (Cloudflare Worker + KV, бесплатно)
