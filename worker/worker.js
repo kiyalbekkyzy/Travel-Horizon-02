@@ -22,7 +22,8 @@
  * Привязки (Settings → Bindings): KV namespace с именем  DB ;  Workers AI с именем  AI  (для автоперевода)
  */
 
-import { handleAuth } from "./auth.js";
+import { handleAuth, sendMail, logEv, T } from "./auth.js";
+import { handleAccount, userById } from "./account.js";
 
 const APPS = { wa: "WhatsApp", tg: "Telegram", ph: "Звонок" };
 const LANG_OK = ["ru", "en", "zh", "es"];
@@ -67,8 +68,11 @@ export default {
         lead.urgent = /^\d{4}-\d{2}-\d{2}$/.test(lead.from) && (new Date(lead.from) - Date.now()) / 864e5 <= 14;
         lead.id = crypto.randomUUID().replace(/-/g, "").slice(0, 12); lead.at = new Date().toISOString(); lead.status = "new"; lead.note = "";
 
+        const luid = await env.DB.get("tok:" + (request.headers.get("X-Token") || "-")), lu = luid && (await userById(env, luid));
+        if (lu) lead.uid = lu.id; // заявка отправлена из личного кабинета: появится в «Истории»
         const list = await readList("leads"); list.unshift(lead); await env.DB.put("leads", JSON.stringify(list.slice(0, 1000)));
         await bump(env, "lead");
+        if (lu) { await logEv(env, lu.id, "request", lead.tour || ""); if (lu.notify !== false) await sendMail(env, lu.email, lu.name, lu.lang || lead.siteLang, "q", "").catch(() => {}); }
 
         // уведомление владельцу (не блокирует ответ клиенту)
         if (env.BOT_TOKEN && env.CHAT_ID) {
@@ -87,12 +91,13 @@ export default {
       }
 
       // ---------- регистрация и вход (с подтверждением почты), см. worker/auth.js ----------
+      if (path === "/api/auth/confirm-email" || path === "/api/me" || path.startsWith("/api/me/") || path === "/api/trips" || path.startsWith("/api/trips/") || path === "/api/history") return await handleAccount(path, request, env, { json, readList });
       if (path.startsWith("/api/auth")) return await handleAuth(path, request, env, { json, readList, bump });
 
       // ---------- дневник путешественника ----------
       if (path === "/api/diary" || path.startsWith("/api/diary/")) {
         const uid = await env.DB.get("tok:" + (request.headers.get("X-Token") || "-"));
-        if (!uid) return json({ error: "auth" }, 401);
+        if (!uid || !(await env.DB.get("uid:" + uid))) return json({ error: "auth" }, 401); // токен удалённого аккаунта не работает
         let list = await readList("d:" + uid);
         if (request.method === "GET") return json(list);
         if (request.method === "DELETE") { const id = decodeURIComponent(path.split("/").pop()); list = list.filter((e) => e.id !== id); await env.DB.put("d:" + uid, JSON.stringify(list)); await env.DB.delete("dimg:" + uid + ":" + id); return json({ ok: true }); }
@@ -148,7 +153,13 @@ export default {
         if (request.method === "DELETE") list = list.filter((l) => l.id !== id);
         else {
           const d = await request.json().catch(() => ({}));
-          list.forEach((l) => { if (l.id !== id) return; if (["new", "progress", "done"].includes(d.status)) l.status = d.status; if (typeof d.note === "string") l.note = clean(d.note, 500); });
+          let changed = null;
+          list.forEach((l) => { if (l.id !== id) return; if (["new", "progress", "done"].includes(d.status)) { if (l.status !== d.status) changed = l; l.status = d.status; } if (typeof d.note === "string") l.note = clean(d.note, 500); });
+          if (changed && changed.uid) { // уведомляем владельца заявки, если он не отключил письма
+            const lu = await userById(env, changed.uid);
+            if (lu && lu.notify !== false) { const lg = lu.lang || changed.siteLang || "ru"; await sendMail(env, lu.email, lu.name, T[lg] ? lg : "ru", "s", "", (T[lg] || T.ru).sStat[changed.status]).catch(() => {}); }
+            if (lu) await logEv(env, lu.id, "request_status", changed.status);
+          }
         }
         await env.DB.put("leads", JSON.stringify(list));
         return json({ ok: true });

@@ -1,0 +1,51 @@
+/* Личный кабинет, кнопка входа в шапке, экран «регистрация прошла успешно» */
+.acc-btn{cursor:pointer;white-space:nowrap}
+.acc-btn.in{display:inline-flex;align-items:center;gap:8px;padding:4px 14px 4px 4px;border:0;border-radius:999px;background:rgba(255,255,255,.16);color:inherit;font:700 .9rem var(--sans);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.5);backdrop-filter:blur(12px)}
+.acc-btn.in:hover{background:rgba(255,255,255,.28)}
+.acc-av{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--c3),#f0b94d);color:#12212e;font:800 1rem var(--sans)}
+.acc-av.big{width:64px;height:64px;font-size:1.8rem;flex:none}
+@media (max-width:760px){.acc-nm{display:none}.acc-btn.in{padding:4px}}
+
+/* экран успеха */
+.ok-screen{text-align:center}.ok-screen h2{margin-bottom:8px}
+.ok-ico{width:76px;height:76px;margin:0 auto 14px;border-radius:50%;background:linear-gradient(135deg,#17b978,#0fa3b1);display:grid;place-items:center;box-shadow:0 10px 26px rgba(15,163,177,.35);animation:okpop .5s cubic-bezier(.2,1.4,.4,1)}
+.ok-ico svg{width:40px;height:40px;fill:none;stroke:#fff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:30;stroke-dashoffset:30;animation:okdraw .5s .25s ease-out forwards}
+@keyframes okpop{from{transform:scale(.4);opacity:0}}@keyframes okdraw{to{stroke-dashoffset:0}}
+.ok-lead{font-size:1.05rem;margin:0 0 14px}
+.ok-steps{list-style:none;counter-reset:s;text-align:left;display:grid;gap:8px;margin:0 auto 14px;padding:0;max-width:340px}
+.ok-steps li{counter-increment:s;display:flex;gap:10px;align-items:center;background:var(--tint);border-radius:14px;padding:10px 14px;font-weight:600;color:var(--ink)}
+.ok-steps li:before{content:counter(s);flex:none;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--c1);color:#fff;font-size:.85rem;font-weight:800}
+.ok-screen .btn.full{margin:6px 0}.ok-screen .link{margin-top:6px}
+
+/* дневник выключен */
+.d-off{padding:28px;text-align:center;display:grid;gap:12px;justify-items:center;margin-bottom:22px}.d-off h3{margin:0;font-family:var(--serif);font-size:1.9rem;color:var(--c1)}.d-off p{margin:0;max-width:520px}
+
+/* панель кабинета */
+.modal.acmodal .m-box{width:min(820px,100%)}
+.acct{padding:28px 28px 26px;color:var(--ink)}
+.ac-head{display:flex;gap:16px;align-items:center;margin-bottom:18px;padding-right:44px}.ac-head h2{margin:0;font-family:var(--serif);font-size:2rem;color:var(--c1);line-height:1.1}.ac-head p{margin:4px 0 0;word-break:break-all}
+.tag.ok{background:#dff5ea;color:#0b7a55}
+.ac-tabs{display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-bottom:18px;padding-bottom:10px}
+.ac-tab{border:0;background:var(--tint);color:var(--c1);font:700 .95rem var(--sans);padding:9px 18px;border-radius:999px;cursor:pointer}.ac-tab.on{background:var(--c1);color:#fff}
+.ac-body h4{margin:18px 0 10px;font-size:1.1rem;color:var(--c1)}.ac-body>h4:first-child{margin-top:0}
+.ac-form{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;align-items:end}.ac-form .full{grid-column:1/-1}
+.ac-form label,.ac-sel{display:grid;gap:5px;font-weight:700;font-size:.92rem;color:var(--c1)}
+.acct input,.acct select,.acct textarea{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:14px;font:500 1rem var(--sans);color:#0b2a3a;-webkit-text-fill-color:#0b2a3a;background:#fff}
+.acct input:focus,.acct select:focus,.acct textarea:focus{outline:0;border-color:var(--c2);box-shadow:0 0 0 3px rgba(15,163,177,.18)}
+.acct input[type=checkbox]{width:22px;height:22px;flex:none;accent-color:var(--c2)}
+.ac-form .btn,.ac-form .ac-msg{grid-column:1/-1}.ac-form .btn{justify-self:start}
+.ac-msg{margin:0;font-weight:700;min-height:0}.ac-msg.err{color:var(--c4)}.ac-msg.ok-t{color:#0b7a55}
+.ac-card{background:var(--tint);border-radius:20px;padding:18px 20px;margin:14px 0}.ac-card h4{margin:0 0 6px}.ac-card p{margin:0 0 10px}
+.ac-card.danger{background:#fdf0ee}.ac-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.ac-row.between{justify-content:space-between;margin:14px 0}
+.sw{display:flex!important;grid-template-columns:none;gap:12px;align-items:flex-start;padding:8px 0;font-weight:400;cursor:pointer}.sw span{display:grid;gap:2px}.sw b{color:var(--c1)}.sw small{font-weight:500;line-height:1.4}
+.ac-sel{margin-top:6px;max-width:260px}
+.link.danger,.btn.danger{color:#b3261e}.btn.danger{background:#b3261e;color:#fff}.btn.danger:hover{background:#8f1c16}.link.danger{font-weight:700}
+.trips,.hist{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.trip{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px 16px;box-shadow:0 4px 14px rgba(18,64,79,.06)}
+.trip.done{background:#f3faf6}.trip.cancelled{opacity:.65}
+.tp-main{display:grid;gap:4px;min-width:0}.tp-main b{font-size:1.05rem;color:var(--c1)}.tp-main p{margin:2px 0 0}.tp-main .tag{justify-self:start}
+.tp-act{display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex:none}
+.tag.st-planned,.tag.st-progress{background:#fff1d9;color:#8a5a00}.tag.st-done{background:#dff5ea;color:#0b7a55}.tag.st-cancelled{background:#eceff1;color:#5d7078}.tag.st-new{background:#e1f0ff;color:#1b5aa6}
+.hist li{display:flex;justify-content:space-between;gap:12px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:14px;padding:11px 14px}.hist li>div{display:grid;gap:2px;min-width:0}.hist.ev li{border-radius:12px;padding:9px 14px}.hist small{white-space:nowrap}
+.ac-stats{list-style:none;margin:0 0 6px;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.ac-stats li{background:var(--tint);border-radius:16px;padding:12px 14px;text-align:center;display:grid;gap:2px}.ac-stats b{font:700 1.25rem var(--serif);color:var(--c1)}.ac-stats span{font-size:.8rem;color:var(--mut)}
+@media (max-width:620px){.acct{padding:20px 16px}.ac-form{grid-template-columns:1fr}.ac-stats{grid-template-columns:1fr}.trip{flex-direction:column}.tp-act{flex-direction:row;align-items:center}.ac-head h2{font-size:1.6rem}.ac-tab{padding:8px 14px}}

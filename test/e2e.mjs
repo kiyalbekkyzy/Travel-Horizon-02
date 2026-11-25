@@ -44,11 +44,11 @@ await page.waitForFunction(() => /не подтверждена|not confirmed/i.
 await page.goto(link); await page.waitForFunction(() => /Почта подтверждена|Email confirmed/.test(document.body.innerText)); ok(true, "link confirms email");
 await page.screenshot({ path: process.env.SHOTS + "/auth-ok.png" });
 ok(mails.length === 2 && /Добро пожаловать|Welcome/.test(mails[1].subject), "welcome email sent"); ok(!/verify=/.test(page.url()), "token removed from URL");
-await page.click('[data-act="mclose"].btn').catch(() => {}); await page.waitForSelector('[data-act="dout"]'); ok(true, "diary is signed in");
+await page.click('[data-act="mclose"].btn').catch(() => {}); await page.waitForSelector("#accBtn.in"); ok(true, "signed in after confirmation");
 // выход, вход, сброс пароля
-await page.click('[data-act="dout"]'); await page.click('[data-act="dauth"][data-m="login"]'); await page.click('[data-act="dforgot"]'); await fill("email", "aigerim@gmail.com"); await page.click('#aForm button[type="submit"]');
+await page.click("#accBtn"); await page.click('[data-tab="s"]'); await page.click('.acct [data-act="dout"]'); await page.waitForSelector("#accBtn.out"); await page.click("#accBtn"); await page.click('[data-act="dforgot"]'); await fill("email", "aigerim@gmail.com"); await page.click('#aForm button[type="submit"]');
 await page.waitForFunction(() => document.querySelector("#aOk").textContent.length > 3); ok(mails.length === 3, "reset email sent");
 const rl = mails[2].htmlContent.match(/href="([^"]*\?reset=[0-9a-f]+[^"]*)"/)[1].replace(/&amp;/g, "&");
-await page.goto(rl); await page.waitForSelector('#aForm [name="password"]'); await fill("password", "BrandNew789"); await page.click('#aForm button[type="submit"]'); await page.waitForSelector('[data-act="dout"]'); ok(true, "password reset signs in");
+await page.goto(rl); await page.waitForSelector('#aForm [name="password"]'); await fill("password", "BrandNew789"); await page.click('#aForm button[type="submit"]'); await page.waitForSelector("#accBtn.in"); ok(true, "password reset signs in");
 ok(errs.length === 0, "no page errors " + errs.join("|"));
 await br.close(); srv.close(); console.log(fail ? fail + " FAILED" : "all passed"); process.exit(fail ? 1 : 0);

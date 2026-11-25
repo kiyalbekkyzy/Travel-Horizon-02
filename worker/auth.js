@@ -28,36 +28,54 @@ const TYPOS = { "gmial.com": "gmail.com", "gmai.com": "gmail.com", "gmail.co": "
   "yaho.com": "yahoo.com", "yahooo.com": "yahoo.com", "hotmial.com": "hotmail.com", "hotmai.com": "hotmail.com", "outlok.com": "outlook.com", "mail.ry": "mail.ru", "mial.ru": "mail.ru",
   "yandex.ry": "yandex.ru", "yadex.ru": "yandex.ru", "icloud.con": "icloud.com" };
 
-const T = {
-  ru: { vSub: "Подтвердите почту: Travel Horizon", vH: "Подтвердите почту", vP: "Вы создали дневник путешественника. Нажмите кнопку, чтобы подтвердить адрес и войти. Ссылка действует 24 часа.", vB: "Подтвердить почту", vIgn: "Если это были не вы, просто проигнорируйте письмо: аккаунт не будет активирован.",
+export const T = {
+  ru: { 
+    qSub: "Заявка принята: Travel Horizon", qH: "Заявка принята", qP: "Мы получили вашу заявку и скоро свяжемся с вами. Следить за статусом можно в личном кабинете, раздел «История».", sSub: "Статус заявки изменён: Travel Horizon", sH: "Статус заявки изменён", sP: "Новый статус вашей заявки:", sStat: { new: "новая", progress: "в работе", done: "выполнена" }, 
+    eSub: "Подтвердите новую почту: Travel Horizon", eH: "Подтвердите новый адрес", eP: "Вы хотите сменить почту аккаунта на этот адрес. Нажмите кнопку, чтобы подтвердить. Ссылка действует 24 часа.", eB: "Подтвердить адрес", eIgn: "Если вы не меняли почту, проигнорируйте письмо: ничего не изменится.",
+    nSub: "Почта аккаунта изменена: Travel Horizon", nH: "Почта аккаунта изменена", nP: "Адрес вашего аккаунта был изменён. Если это были не вы, срочно сбросьте пароль на сайте.", vSub: "Подтвердите почту: Travel Horizon", vH: "Подтвердите почту", vP: "Вы создали дневник путешественника. Нажмите кнопку, чтобы подтвердить адрес и войти. Ссылка действует 24 часа.", vB: "Подтвердить почту", vIgn: "Если это были не вы, просто проигнорируйте письмо: аккаунт не будет активирован.",
     wSub: "Добро пожаловать в Travel Horizon", wH: "Почта подтверждена", wP: "Ваш дневник путешественника готов. Отмечайтесь в местах поездки, добавляйте фото и получайте подарки.", wB: "Открыть дневник", wSec: "Если вы не создавали этот аккаунт, напишите нам в ответ на это письмо.",
     rSub: "Новый пароль: Travel Horizon", rH: "Сброс пароля", rP: "Мы получили просьбу задать новый пароль. Нажмите кнопку. Ссылка действует 1 час.", rB: "Задать новый пароль", rIgn: "Если вы не просили сброс, ничего делать не нужно: пароль остался прежним.",
     cSub: "Пароль изменён: Travel Horizon", cH: "Пароль изменён", cP: "Пароль от вашего дневника только что был изменён. Если это были не вы, срочно сбросьте пароль ещё раз на сайте.", hi: "Здравствуйте" },
-  en: { vSub: "Confirm your email: Travel Horizon", vH: "Confirm your email", vP: "You created a traveller diary. Press the button to confirm your address and sign in. The link works for 24 hours.", vB: "Confirm email", vIgn: "If this wasn’t you, just ignore this email: the account will not be activated.",
+  en: { 
+    qSub: "Request received: Travel Horizon", qH: "Request received", qP: "We received your request and will contact you soon. You can follow its status in your account, “History” tab.", sSub: "Request status changed: Travel Horizon", sH: "Request status changed", sP: "The new status of your request:", sStat: { new: "new", progress: "in progress", done: "completed" }, 
+    eSub: "Confirm your new email: Travel Horizon", eH: "Confirm your new address", eP: "You asked to change your account email to this address. Press the button to confirm. The link works for 24 hours.", eB: "Confirm address", eIgn: "If you didn’t change your email, ignore this message: nothing will change.",
+    nSub: "Account email changed: Travel Horizon", nH: "Account email changed", nP: "The email address of your account was changed. If this wasn’t you, reset your password on the site right away.", vSub: "Confirm your email: Travel Horizon", vH: "Confirm your email", vP: "You created a traveller diary. Press the button to confirm your address and sign in. The link works for 24 hours.", vB: "Confirm email", vIgn: "If this wasn’t you, just ignore this email: the account will not be activated.",
     wSub: "Welcome to Travel Horizon", wH: "Email confirmed", wP: "Your traveller diary is ready. Check in at places on your trip, add photos and earn gifts.", wB: "Open the diary", wSec: "If you did not create this account, reply to this email and tell us.",
     rSub: "New password: Travel Horizon", rH: "Password reset", rP: "We received a request to set a new password. Press the button. The link works for 1 hour.", rB: "Set a new password", rIgn: "If you didn’t ask for this, do nothing: your password stays the same.",
     cSub: "Password changed: Travel Horizon", cH: "Password changed", cP: "The password of your diary was just changed. If this wasn’t you, reset it again on the site right away.", hi: "Hello" },
-  es: { vSub: "Confirma tu correo: Travel Horizon", vH: "Confirma tu correo", vP: "Has creado un diario de viajero. Pulsa el botón para confirmar tu dirección e iniciar sesión. El enlace funciona 24 horas.", vB: "Confirmar correo", vIgn: "Si no fuiste tú, ignora este mensaje: la cuenta no se activará.",
+  es: { 
+    qSub: "Solicitud recibida: Travel Horizon", qH: "Solicitud recibida", qP: "Recibimos tu solicitud y te contactaremos pronto. Puedes seguir su estado en tu cuenta, pestaña «Historial».", sSub: "Estado de la solicitud cambiado: Travel Horizon", sH: "Estado de la solicitud cambiado", sP: "El nuevo estado de tu solicitud:", sStat: { new: "nueva", progress: "en curso", done: "completada" }, 
+    eSub: "Confirma tu nuevo correo: Travel Horizon", eH: "Confirma tu nueva dirección", eP: "Pediste cambiar el correo de tu cuenta a esta dirección. Pulsa el botón para confirmar. El enlace funciona 24 horas.", eB: "Confirmar dirección", eIgn: "Si no cambiaste tu correo, ignora este mensaje: no cambiará nada.",
+    nSub: "Correo de la cuenta cambiado: Travel Horizon", nH: "Correo de la cuenta cambiado", nP: "La dirección de tu cuenta fue cambiada. Si no fuiste tú, restablece la contraseña en el sitio de inmediato.", vSub: "Confirma tu correo: Travel Horizon", vH: "Confirma tu correo", vP: "Has creado un diario de viajero. Pulsa el botón para confirmar tu dirección e iniciar sesión. El enlace funciona 24 horas.", vB: "Confirmar correo", vIgn: "Si no fuiste tú, ignora este mensaje: la cuenta no se activará.",
     wSub: "Bienvenido a Travel Horizon", wH: "Correo confirmado", wP: "Tu diario de viajero está listo. Marca los lugares de tu viaje, añade fotos y gana regalos.", wB: "Abrir el diario", wSec: "Si no creaste esta cuenta, responde a este correo.",
     rSub: "Nueva contraseña: Travel Horizon", rH: "Restablecer contraseña", rP: "Recibimos una solicitud para crear una nueva contraseña. Pulsa el botón. El enlace funciona 1 hora.", rB: "Crear nueva contraseña", rIgn: "Si no lo pediste, no hagas nada: tu contraseña sigue igual.",
     cSub: "Contraseña cambiada: Travel Horizon", cH: "Contraseña cambiada", cP: "La contraseña de tu diario se acaba de cambiar. Si no fuiste tú, restablécela de nuevo en el sitio.", hi: "Hola" },
-  zh: { vSub: "请确认邮箱：Travel Horizon", vH: "确认您的邮箱", vP: "您创建了旅行者日记。请点击按钮确认邮箱并登录。链接 24 小时内有效。", vB: "确认邮箱", vIgn: "如果不是您本人操作，请忽略此邮件，账号不会被激活。",
+  zh: { 
+    qSub: "已收到申请：Travel Horizon", qH: "已收到申请", qP: "我们已收到您的申请，会尽快联系您。您可在个人中心的“历史”中查看状态。", sSub: "申请状态已更新：Travel Horizon", sH: "申请状态已更新", sP: "您的申请新状态：", sStat: { new: "新申请", progress: "处理中", done: "已完成" }, 
+    eSub: "请确认新邮箱：Travel Horizon", eH: "确认新邮箱地址", eP: "您申请将账号邮箱更改为此地址。请点击按钮确认，链接 24 小时内有效。", eB: "确认地址", eIgn: "如果不是您本人操作，请忽略此邮件，账号不会有任何变化。",
+    nSub: "账号邮箱已更改：Travel Horizon", nH: "账号邮箱已更改", nP: "您的账号邮箱地址已被更改。如果不是您本人操作，请立即在网站上重置密码。", vSub: "请确认邮箱：Travel Horizon", vH: "确认您的邮箱", vP: "您创建了旅行者日记。请点击按钮确认邮箱并登录。链接 24 小时内有效。", vB: "确认邮箱", vIgn: "如果不是您本人操作，请忽略此邮件，账号不会被激活。",
     wSub: "欢迎来到 Travel Horizon", wH: "邮箱已确认", wP: "您的旅行者日记已就绪。在旅途中打卡、添加照片并获得礼物。", wB: "打开日记", wSec: "如果您没有创建此账号，请直接回复此邮件。",
     rSub: "新密码：Travel Horizon", rH: "重置密码", rP: "我们收到了设置新密码的请求。请点击按钮，链接 1 小时内有效。", rB: "设置新密码", rIgn: "如果不是您申请的，无需任何操作，密码保持不变。",
     cSub: "密码已更改：Travel Horizon", cH: "密码已更改", cP: "您的日记密码刚刚被更改。如果不是您本人操作，请立即在网站上重新重置密码。", hi: "您好" },
 };
 
+/** Публичные данные пользователя (без пароля) */
+export const pub = (u) => ({ id: u.id, name: u.name, email: u.email, phone: u.phone || "", country: u.country || "", about: u.about || "", diary: u.diary !== false, notify: u.notify !== false, lang: u.lang || "", at: u.at });
+/** Запись в историю аккаунта (последние 100 событий) */
+export async function logEv(env, uid, type, text) {
+  try { const k = "hv:" + uid, l = JSON.parse((await env.DB.get(k)) || "[]"); l.unshift({ at: new Date().toISOString(), type, text: String(text).slice(0, 200) }); await env.DB.put(k, JSON.stringify(l.slice(0, 100))); } catch (e) { /* история не должна ломать действие */ }
+}
 const hex = (b) => Array.from(new Uint8Array(b)).map((x) => x.toString(16).padStart(2, "0")).join("");
-const clean = (s, max) => String(s == null ? "" : s).replace(/[\u0000-\u001f]+/g, " ").trim().slice(0, max);
+export const clean = (s, max) => String(s == null ? "" : s).replace(/[\u0000-\u001f]+/g, " ").trim().slice(0, max);
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-const rnd = (n) => hex(crypto.getRandomValues(new Uint8Array(n)));
-async function sha(s) { return hex(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s))); }
-async function hashPw(pw, saltHex) {
+export const rnd = (n) => hex(crypto.getRandomValues(new Uint8Array(n)));
+export async function sha(s) { return hex(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s))); }
+export async function hashPw(pw, saltHex) {
   const salt = Uint8Array.from(saltHex.match(/../g).map((h) => parseInt(h, 16)));
   const k = await crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveBits"]);
   return hex(await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt, iterations: 100000 }, k, 256));
 }
-function same(a, b) { if (a.length !== b.length) return false; let r = 0; for (let i = 0; i < a.length; i++) r |= a.charCodeAt(i) ^ b.charCodeAt(i); return r === 0; }
+export function same(a, b) { if (a.length !== b.length) return false; let r = 0; for (let i = 0; i < a.length; i++) r |= a.charCodeAt(i) ^ b.charCodeAt(i); return r === 0; }
 
 /** Проверка адреса без отправки письма. Возвращает код ошибки или "" если всё в порядке. */
 export async function checkEmail(email) {
@@ -86,15 +104,15 @@ async function hasMail(domain) {
     return a.Status === 0 && (a.Answer || []).some((x) => x.type === 1 || x.type === 28) || ((await dns(domain, "AAAA")).Answer || []).length > 0;
   } catch (e) { return true; }
 }
-function pwProblem(pw, email) {
+export function pwProblem(pw, email) {
   if (pw.length < 8 || pw.length > 100) return "pass";
   if (!/[A-Za-zЀ-ӿ]/.test(pw) || !/\d/.test(pw)) return "pass";
   if (pw.toLowerCase() === email) return "pass";
   return "";
 }
 
-function mailHtml(l, kind, link, name, site) {
-  const t = T[l], h = t[kind + "H"], p = t[kind + "P"], b = t[kind + "B"], ign = t[kind + "Ign"] || t[kind + "Sec"] || "";
+function mailHtml(l, kind, link, name, site, extra) {
+  const t = T[l], h = t[kind + "H"], p = t[kind + "P"] + (extra ? " " + extra : ""), b = t[kind + "B"], ign = t[kind + "Ign"] || t[kind + "Sec"] || "";
   return '<!doctype html><html><body style="margin:0;background:#eef6f4;font-family:Arial,Helvetica,sans-serif;color:#0b2c3a">' +
     '<table width="100%" cellpadding="0" cellspacing="0" style="background:#eef6f4;padding:28px 12px"><tr><td align="center">' +
     '<table width="100%" style="max-width:520px;background:#fff;border-radius:18px;overflow:hidden" cellpadding="0" cellspacing="0">' +
@@ -107,7 +125,7 @@ function mailHtml(l, kind, link, name, site) {
     '<p style="margin:0;font-size:13px;color:#5b7480;line-height:1.5">' + esc(ign) + '</p></td></tr></table>' +
     '<p style="font-size:12px;color:#7b9099;margin:14px 0 0">' + esc(site) + '</p></td></tr></table></body></html>';
 }
-async function sendMail(env, to, name, l, kind, link) {
+export async function sendMail(env, to, name, l, kind, link, extra = "") {
   if (!env.BREVO_API_KEY || !env.MAIL_FROM) throw new Error("mail_off");
   const site = env.SITE_URL || "https://kiyalbekkyzy.github.io/Travel-Horizon-02/";
   const t = T[l];
@@ -115,7 +133,7 @@ async function sendMail(env, to, name, l, kind, link) {
     method: "POST", headers: { "api-key": env.BREVO_API_KEY, "content-type": "application/json", accept: "application/json" },
     body: JSON.stringify({
       sender: { email: env.MAIL_FROM, name: env.MAIL_FROM_NAME || "Travel Horizon" }, to: [{ email: to, name }], subject: t[kind + "Sub"],
-      htmlContent: mailHtml(l, kind, link, name, site), textContent: t[kind + "H"] + "\n\n" + t[kind + "P"] + (link ? "\n\n" + link : "") + "\n\n" + (t[kind + "Ign"] || t[kind + "Sec"] || ""),
+      htmlContent: mailHtml(l, kind, link, name, site, extra), textContent: t[kind + "H"] + "\n\n" + t[kind + "P"] + (extra ? " " + extra : "") + (link ? "\n\n" + link : "") + "\n\n" + (t[kind + "Ign"] || t[kind + "Sec"] || ""),
     }),
   });
   if (!r.ok) throw new Error("mail_fail");
@@ -134,7 +152,7 @@ export async function handleAuth(path, request, env, ctx) {
   const saveUser = (u, ttl) => env.DB.put("u:" + u.email, JSON.stringify(u), ttl ? { expirationTtl: ttl } : undefined);
   const newToken = async (prefix, email, ttl) => { const raw = rnd(24); await env.DB.put(prefix + (await sha(raw)), email, { expirationTtl: ttl }); return raw; };
   const takeToken = async (prefix, raw) => { const key = prefix + (await sha(String(raw || ""))); const email = await env.DB.get(key); return { key, email }; };
-  const session = async (u) => { const token = rnd(24); await env.DB.put("tok:" + token, u.id, { expirationTtl: 60 * 86400 }); await env.DB.put("uid:" + u.id, u.email); return { token, user: { id: u.id, name: u.name, email: u.email } }; };
+  const session = async (u) => { const token = rnd(24); await env.DB.put("tok:" + token, u.id, { expirationTtl: 60 * 86400 }); await env.DB.put("uid:" + u.id, u.email); return { token, user: pub(u) }; };
   const mailErr = (e) => json({ error: e.message === "mail_off" ? "mail_off" : "mail_fail" }, e.message === "mail_off" ? 503 : 502);
   const sendVerify = async (u) => sendMail(env, u.email, u.name, lang, "v", site + "?verify=" + (await newToken("vt:", u.email, 86400)) + "#passport");
 
@@ -148,7 +166,7 @@ export async function handleAuth(path, request, env, ctx) {
     if (u.verified === false) {
       u.verified = true; u.verifiedAt = new Date().toISOString(); await saveUser(u); // без TTL: аккаунт сохраняется
       const idx = await readList("uidx"); if (!idx.includes(u.email)) { idx.push(u.email); await env.DB.put("uidx", JSON.stringify(idx)); }
-      await bump(env, "signup");
+      await bump(env, "signup"); await logEv(env, u.id, "signup", "verified");
       await sendMail(env, u.email, u.name, lang, "w", site + "#passport").catch(() => {}); // уведомление «добро пожаловать»
       if (env.BOT_TOKEN && env.CHAT_ID) await fetch("https://api.telegram.org/bot" + env.BOT_TOKEN + "/sendMessage", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ chat_id: env.CHAT_ID, text: "👤 Новый пользователь дневника: " + u.name + " (" + u.email + ")" }) }).catch(() => {});
     }
@@ -199,7 +217,7 @@ export async function handleAuth(path, request, env, ctx) {
     if (u && u.verified !== false) return json({ error: "used" }, 409);
     if (!(await limit("resend:" + email, 3, 3600))) return json({ error: "too many" }, 429);
     const salt = rnd(16);
-    u = { id: (u && u.id) || crypto.randomUUID().replace(/-/g, "").slice(0, 14), name, email, salt, hash: await hashPw(pass, salt), at: (u && u.at) || new Date().toISOString(), verified: false };
+    u = { id: (u && u.id) || crypto.randomUUID().replace(/-/g, "").slice(0, 14), name, email, salt, hash: await hashPw(pass, salt), at: (u && u.at) || new Date().toISOString(), verified: false, diary: false, notify: true, lang };
     await saveUser(u, 7 * 86400); // неподтверждённая запись сама удаляется через 7 дней
     try { await sendVerify(u); } catch (e) { return mailErr(e); }
     return json({ pending: true, email });

@@ -44,11 +44,14 @@
     if (!DY.user) {
       return '<div class="diary out">' + steps + '<div class="d-cta"><button type="button" class="btn" data-act="dauth" data-m="register">' + esc(t("dReg")) + '</button><button type="button" class="btn ghost" data-act="dauth" data-m="login">' + esc(t("dLogin")) + "</button></div>" + demo + rewardsHtml({ n: 0 }) + "</div>";
     }
+    if (DY.user.diary === false) { // аккаунт есть, а дневник человек пока не включил
+      return '<div class="diary off"><div class="d-off glass-l"><h3>' + esc(t("dOffT")) + "</h3><p>" + esc(t("dOffP")) + '</p><button type="button" class="btn big" data-act="ddiary">' + esc(t("dOn")) + '</button><button type="button" class="link" data-act="acc">' + esc(t("aOpen")) + "</button></div>" + steps + rewardsHtml({ n: 0 }) + "</div>";
+    }
     var k = stats(), name = k.top ? tr((W.S.passport.topRank || {}).name) : tr((k.cur || {}).name);
     return '<div class="diary in"><div class="d-top glass-l">' + ringHtml(k) + '<div class="d-who"><small>' + esc(t("dHello")) + ", " + esc(DY.user.name) + "</small><h3>" + esc(name) + "</h3>" +
       (k.top ? '<p class="ok-t">' + esc(t("dToTop")) + "</p>" : (k.next ? '<p class="muted">' + esc((k.next.n - k.n) + " " + t("dCheckins") + " " + t("dNext") + ": " + tr(k.next.name)) + "</p>" : "")) +
       '<ul class="d-nums"><li><b>' + k.pts + "</b><span>" + esc(t("dPoints")) + "</span></li><li><b>" + k.n + "</b><span>" + esc(t("dCheckins")) + '</span></li></ul></div>' +
-      '<div class="d-act"><button type="button" class="btn big" data-act="dcheck">' + W.ICONS.pin + esc(t("dCheck")) + '</button><button type="button" class="link" data-act="dout">' + esc(t("dOut")) + "</button></div></div>" +
+      '<div class="d-act"><button type="button" class="btn big" data-act="dcheck">' + W.ICONS.pin + esc(t("dCheck")) + '</button><button type="button" class="link" data-act="acc">' + esc(t("aOpen")) + "</button></div></div>" +
       (DY.loaded ? (DY.list.length ? '<div class="entries">' + DY.list.map(entryHtml).join("") + "</div>" : '<p class="muted d-empty">' + esc(t("dEmpty")) + "</p>") : '<p class="muted">…</p>') + rewardsHtml(k) + demo + "</div>";
   }
   function drawDiary() { var b = $("passB"); if (b) b.innerHTML = diaryHtml(); }
@@ -66,12 +69,13 @@
     x.textContent = t(m) + (er.message === "typo" && er.hint ? " " + er.hint + "?" : ""); x.hidden = false;
   }
   function afterIn() {
-    W.closeModal(); loadDiary(); var pa = $("passport"); if (pa) pa.scrollIntoView({ behavior: "smooth" });
+    W.closeModal(); loadDiary(); window.dispatchEvent(new Event("wt-auth")); var pa = $("passport"); if (pa) pa.scrollIntoView({ behavior: "smooth" });
     if (DY.pending) { var c = DY.pending; DY.pending = ""; setTimeout(function () { W.applyStamp(c); }, 500); }
   }
-  function checkMail(email) { // экран «проверьте почту» с повторной отправкой
-    W.modal('<div class="auth"><h2>' + esc(t("dCheckT")) + '</h2><p>' + esc(t("dCheckP").replace("%s", email)) + '</p><p class="muted small" id="aOk" role="status" aria-live="polite"></p>' +
-      '<button type="button" class="btn ghost full" id="aResend">' + esc(t("dResend")) + '</button><p class="err" id="aErr" role="alert" hidden></p></div>', "narrow");
+  function checkMail(email) { // экран успеха: «аккаунт создан, подтвердите почту»
+    W.modal('<div class="auth ok-screen"><div class="ok-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div><h2>' + esc(t("aOkT")) + '</h2><p class="ok-lead">' + esc(t("aOkP").replace("%s", email)) + '</p>' +
+      '<ol class="ok-steps"><li>' + esc(t("aOk1")) + '</li><li>' + esc(t("aOk2")) + '</li><li>' + esc(t("aOk3")) + '</li></ol><p class="muted small">' + esc(t("aOkSpam")) + '</p><p class="muted small" id="aOk" role="status" aria-live="polite"></p>' +
+      '<button type="button" class="btn ghost full" id="aResend">' + esc(t("dResend")) + '</button><p class="err" id="aErr" role="alert" hidden></p><button type="button" class="link" data-act="mclose">' + esc(t("dOkBtn")) + '</button></div>', "narrow");
     $("aResend").addEventListener("click", function (e) {
       var b = e.target; b.disabled = true; $("aErr").hidden = true;
       WTStore.resend(email, W.lang).then(function () { $("aOk").textContent = t("dResent"); setTimeout(function () { b.disabled = false; }, 20000); }).catch(function (er) { b.disabled = false; showErr(er); });
@@ -97,15 +101,16 @@
       '<button type="button" class="link" data-act="dauth" data-m="' + (reg ? "login" : "register") + '">' + esc(t(reg ? "dHave" : "dNo")) + '</button><p class="muted small">' + esc(t("dPriv")) + "</p></div>", "narrow");
     $("aForm").addEventListener("submit", function (e) {
       e.preventDefault(); var f = e.target, b = f.querySelector('button[type="submit"]'); $("aErr").hidden = true; $("aResend2").hidden = true;
-      b.disabled = true;
+      b.disabled = true; var bl = b.textContent; b.textContent = t("dSending");
       WTStore.auth(DY.mode, { name: f.name ? f.name.value : "", email: f.email.value, password: f.password.value, lang: W.lang }).then(function (r) {
         if (r && r.pending) checkMail(r.email); else afterIn();
       }).catch(function (er) {
-        b.disabled = false; showErr(er);
+        b.disabled = false; b.textContent = bl; showErr(er);
         if (er.message === "unverified") { var rb = $("aResend2"); rb.hidden = false; rb.onclick = function () { checkMail(f.email.value.trim().toLowerCase()); WTStore.resend(f.email.value.trim().toLowerCase(), W.lang).catch(function () {}); }; }
       });
     });
   }
+  W.authModal = authModal; W.loadDiary = loadDiary;
   W.acts.dauth = function (el) { authModal(el.getAttribute("data-m")); };
   W.acts.dforgot = function () { forgotModal(); };
 
@@ -117,7 +122,7 @@
   function handleMailLink() {
     var q = new URLSearchParams(location.search), v = q.get("verify"), r = q.get("reset"); if (!v && !r) return; cleanUrl();
     if (v) {
-      WTStore.verifyEmail(v, W.lang).then(function () { loadDiary(); notice(t("dVerOk"), t("dVerOkP")); })
+      WTStore.verifyEmail(v, W.lang).then(function () { loadDiary(); window.dispatchEvent(new Event("wt-auth")); notice(t("dVerOk"), t("dVerOkP")); })
         .catch(function () { W.modal('<div class="auth"><h2>' + esc(t("dVerOk")) + '?</h2><p>' + esc(t("dVerBad")) + '</p><button type="button" class="btn full" data-act="dauth" data-m="login">' + esc(t("dLogin")) + '</button></div>', "narrow"); });
     } else {
       W.modal('<div class="auth"><h2>' + esc(t("dNewPassT")) + '</h2><form id="aForm" novalidate><label>' + esc(t("dPass")) + '<input name="password" type="password" autocomplete="new-password"></label><p class="err" id="aErr" role="alert" hidden></p><button class="btn full" type="submit">' + esc(t("dSave")) + '</button></form></div>', "narrow");
@@ -128,7 +133,8 @@
     }
   }
   setTimeout(handleMailLink, 600);
-  W.acts.dout = function () { WTStore.signOut(); loadDiary(); };
+  W.acts.dout = function () { WTStore.signOut(); loadDiary(); window.dispatchEvent(new Event("wt-auth")); };
+  W.acts.ddiary = function () { WTStore.updateMe({ diary: true }).then(function () { loadDiary(); window.dispatchEvent(new Event("wt-auth")); }); };
   W.acts.edel = function (el) { if (!confirm(t("dDelQ"))) return; var id = el.getAttribute("data-id"); WTStore.deleteEntry(id).then(function () { DY.list = DY.list.filter(function (x) { return x.id !== id; }); drawDiary(); }); };
 
   function dist(a, b, c, d) { var R = 6371, p = Math.PI / 180, x = Math.sin((c - a) * p / 2) ** 2 + Math.cos(a * p) * Math.cos(c * p) * Math.sin((d - b) * p / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(x)); }

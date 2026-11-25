@@ -17,6 +17,8 @@ tags:
     description: Фотографии
   - name: Stories
     description: Впечатления гостей (с модерацией)
+  - name: Account
+    description: Личный кабинет (профиль, поездки, история, настройки)
   - name: Travellers
     description: Регистрация путешественников и их дневник
   - name: Stats
@@ -32,11 +34,37 @@ components:
       in: header
       name: X-Token
   schemas:
+    Profile:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        email: { type: string }
+        phone: { type: string }
+        country: { type: string }
+        about: { type: string }
+        diary: { type: boolean, description: "Дневник путешественника включён (у нового аккаунта false)" }
+        notify: { type: boolean, description: "Письма о заявках" }
+        lang: { type: string }
+        at: { type: string, format: date-time }
+    TripInput:
+      type: object
+      properties:
+        title: { type: string, maxLength: 100, example: "Сон-Куль верхом" }
+        tourId: { type: string }
+        from: { type: string, example: "2027-07-10" }
+        to: { type: string, example: "2027-07-17" }
+        people: { type: integer, minimum: 1, maximum: 50 }
+        note: { type: string, maxLength: 500 }
+    Trip:
+      allOf:
+        - { $ref: "#/components/schemas/TripInput" }
+        - { type: object, properties: { id: { type: string }, at: { type: string, format: date-time }, status: { type: string, enum: [planned, done, cancelled] } } }
     Session:
       type: object
       properties:
         token: { type: string }
-        user: { type: object, properties: { id: { type: string }, name: { type: string }, email: { type: string } } }
+        user: { $ref: "#/components/schemas/Profile" }
     Lead:
       type: object
       required: [name, country, contact]
@@ -379,6 +407,148 @@ paths:
       security: [{ TravellerToken: [] }]
       responses:
         "200": { description: OK }
+  /api/me:
+    get:
+      tags: [Account]
+      summary: My profile
+      security: [{ TravellerToken: [] }]
+      responses:
+        "200": { description: Профиль (без пароля), content: { application/json: { schema: { $ref: "#/components/schemas/Profile" } } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    patch:
+      tags: [Account]
+      summary: Update my profile and settings
+      description: "Любые из полей. `diary` включает или выключает дневник путешественника (у нового аккаунта выключен), `notify` — письма о заявках, `lang` — язык писем."
+      security: [{ TravellerToken: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string, maxLength: 60 }
+                phone: { type: string, maxLength: 24, example: "+996 555 123 456" }
+                country: { type: string, maxLength: 60 }
+                about: { type: string, maxLength: 400 }
+                diary: { type: boolean }
+                notify: { type: boolean }
+                lang: { type: string, enum: [ru, en, zh, es] }
+      responses:
+        "200": { description: Обновлённый профиль, content: { application/json: { schema: { $ref: "#/components/schemas/Profile" } } } }
+        "400": { description: "error=name | phone" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    delete:
+      tags: [Account]
+      summary: Delete my account and all my data
+      description: Удаляет профиль, поездки, историю и дневник. Нужен пароль.
+      security: [{ TravellerToken: [] }]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, required: [password], properties: { password: { type: string } } } } }
+      responses:
+        "200": { description: Удалено }
+        "401": { description: Неверный пароль или токен }
+  /api/me/password:
+    post:
+      tags: [Account]
+      summary: Change my password
+      description: Нужен текущий пароль. На почту приходит письмо-уведомление.
+      security: [{ TravellerToken: [] }]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, required: [old, password], properties: { old: { type: string }, password: { type: string, minLength: 8 }, lang: { type: string, enum: [ru, en, zh, es] } } } } }
+      responses:
+        "200": { description: Пароль изменён }
+        "400": { description: "error=pass (слабый новый пароль)" }
+        "401": { description: Неверный текущий пароль }
+  /api/me/email:
+    post:
+      tags: [Account]
+      summary: Request an email change
+      description: Новый адрес проверяется так же, как при регистрации. Письмо со ссылкой уходит на НОВЫЙ адрес; почта меняется только после перехода по ссылке (`POST /api/auth/confirm-email`).
+      security: [{ TravellerToken: [] }]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, required: [email, password], properties: { email: { type: string, format: email }, password: { type: string }, lang: { type: string, enum: [ru, en, zh, es] } } } } }
+      responses:
+        "200": { description: Письмо отправлено }
+        "400": { description: "error=mail | typo | disposable | nomx | same" }
+        "401": { description: Неверный пароль }
+        "409": { description: "Адрес уже занят (error=used)" }
+  /api/auth/confirm-email:
+    post:
+      tags: [Account]
+      summary: Confirm the new email by the link token
+      description: Токен из ссылки `?confirm=…`. Меняет адрес, шлёт уведомление на старый адрес и выдаёт токен входа.
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, required: [token], properties: { token: { type: string } } } } }
+      responses:
+        "200": { description: Вход выполнен, content: { application/json: { schema: { $ref: "#/components/schemas/Session" } } } }
+        "400": { description: "Ссылка недействительна (error=token)" }
+        "409": { description: "Адрес уже занят (error=used)" }
+  /api/trips:
+    get:
+      tags: [Account]
+      summary: My planned trips
+      security: [{ TravellerToken: [] }]
+      responses:
+        "200": { description: Список поездок, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/Trip" } } } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    post:
+      tags: [Account]
+      summary: Plan a trip
+      security: [{ TravellerToken: [] }]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: "#/components/schemas/TripInput" } } }
+      responses:
+        "200": { description: Созданная поездка, content: { application/json: { schema: { $ref: "#/components/schemas/Trip" } } } }
+        "400": { description: "error=invalid (нет названия) | limit (больше 50)" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+  /api/trips/{id}:
+    parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+    patch:
+      tags: [Account]
+      summary: Edit a trip or change its status
+      security: [{ TravellerToken: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - { $ref: "#/components/schemas/TripInput" }
+                - { type: object, properties: { status: { type: string, enum: [planned, done, cancelled] } } }
+      responses:
+        "200": { description: Обновлённая поездка, content: { application/json: { schema: { $ref: "#/components/schemas/Trip" } } } }
+        "404": { description: Не найдена }
+    delete:
+      tags: [Account]
+      summary: Delete a trip
+      security: [{ TravellerToken: [] }]
+      responses:
+        "200": { description: Удалено }
+        "404": { description: Не найдена }
+  /api/history:
+    get:
+      tags: [Account]
+      summary: My history
+      description: События аккаунта (регистрация, поездки, пароль и т.д.), заявки, отправленные из кабинета (со статусами), и число отметок в дневнике. Контактные данные из заявок не возвращаются.
+      security: [{ TravellerToken: [] }]
+      responses:
+        "200":
+          description: История
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  joined: { type: string, format: date-time }
+                  diaryEntries: { type: integer }
+                  events: { type: array, items: { type: object, properties: { at: { type: string, format: date-time }, type: { type: string, example: trip }, text: { type: string } } } }
+                  requests: { type: array, items: { type: object, properties: { id: { type: string }, at: { type: string, format: date-time }, tour: { type: string }, from: { type: string }, to: { type: string }, people: { type: string }, status: { type: string, enum: [new, progress, done] } } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
   /api/diary:
     get:
       tags: [Travellers]
