@@ -8,7 +8,8 @@
  *   POST /api/translate    — автоперевод текста ru → en/zh/es (админ), через Workers AI
  *   POST /api/story        — впечатление гостя (фото + отзыв), попадает на модерацию
  *   GET  /api/stories      — одобренные; с ?all=1 и паролем — все (админ);  PATCH/DELETE /api/stories/:id (админ)
- *   POST /api/auth, GET/POST/DELETE /api/diary — регистрация и дневник путешественника; GET /api/users (админ)
+ *   POST /api/auth[/verify|/resend|/forgot|/reset|/logout] — регистрация с подтверждением почты, вход, сброс пароля (worker/auth.js)
+ *   GET/POST/DELETE /api/diary — дневник путешественника; GET /api/users (админ)
  *   POST /api/track        — счётчик событий (view, chat, lead, stamp);  GET /api/stats (админ)
  *
  * Переменные (Settings → Variables and Secrets):
@@ -16,9 +17,12 @@
  *   BOT_TOKEN, CHAT_ID (Secret)  Telegram-бот и ваш chat_id: сюда придут новые заявки
  *   ALLOWED_ORIGIN  (Text)    адрес сайта, например https://mysite.pages.dev  (или * при тестировании)
  *   Необязательно, автоответ клиенту в WhatsApp (нужен платный WhatsApp Business API от Meta и одобренный шаблон):
+ *   BREVO_API_KEY (Secret), MAIL_FROM (Text), MAIL_FROM_NAME, SITE_URL — отправка писем подтверждения (см. README, «Почта»)
  *   WA_TOKEN (Secret), WA_PHONE_ID (Text), WA_TEMPLATE (Text, имя шаблона), WA_TEMPLATE_LANG (Text, по умолчанию ru)
  * Привязки (Settings → Bindings): KV namespace с именем  DB ;  Workers AI с именем  AI  (для автоперевода)
  */
+
+import { handleAuth } from "./auth.js";
 
 const APPS = { wa: "WhatsApp", tg: "Telegram", ph: "Звонок" };
 const LANG_OK = ["ru", "en", "zh", "es"];
@@ -82,25 +86,10 @@ export default {
         return json({ ok: true });
       }
 
+      // ---------- регистрация и вход (с подтверждением почты), см. worker/auth.js ----------
+      if (path.startsWith("/api/auth")) return await handleAuth(path, request, env, { json, readList, bump });
+
       // ---------- дневник путешественника ----------
-      if (path === "/api/auth" && request.method === "POST") {
-        const d = await request.json().catch(() => null); if (!d) return json({ error: "bad request" }, 400);
-        const email = clean(d.email, 120).toLowerCase(), pass = String(d.password || ""), name = clean(d.name, 60);
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return json({ error: "mail" }, 400);
-        if (pass.length < 6 || pass.length > 100) return json({ error: "pass" }, 400);
-        if (!(await rate("auth", 15, 3600))) return json({ error: "too many" }, 429);
-        let user = JSON.parse((await env.DB.get("u:" + email)) || "null");
-        if (d.mode === "register") {
-          if (user) return json({ error: "used" }, 409); if (name.length < 1) return json({ error: "name" }, 400);
-          const salt = hex(crypto.getRandomValues(new Uint8Array(16)));
-          user = { id: crypto.randomUUID().replace(/-/g, "").slice(0, 14), name, email, salt, hash: await hashPw(pass, salt), at: new Date().toISOString() };
-          await env.DB.put("u:" + email, JSON.stringify(user));
-          const idx = await readList("uidx"); idx.push(email); await env.DB.put("uidx", JSON.stringify(idx));
-        } else if (!user || (await hashPw(pass, user.salt)) !== user.hash) return json({ error: "auth" }, 401);
-        const token = hex(crypto.getRandomValues(new Uint8Array(24)));
-        await env.DB.put("tok:" + token, user.id, { expirationTtl: 60 * 86400 }); await env.DB.put("uid:" + user.id, user.email);
-        return json({ token, user: { id: user.id, name: user.name, email: user.email } });
-      }
       if (path === "/api/diary" || path.startsWith("/api/diary/")) {
         const uid = await env.DB.get("tok:" + (request.headers.get("X-Token") || "-"));
         if (!uid) return json({ error: "auth" }, 401);
@@ -125,7 +114,7 @@ export default {
       }
       if (path === "/api/users" && request.method === "GET") {
         if (!isAdmin(request, env)) return json({ error: "auth" }, 401);
-        const out = []; for (const em of (await readList("uidx")).slice(-300)) { const u = JSON.parse((await env.DB.get("u:" + em)) || "null"); if (u) out.push({ id: u.id, name: u.name, email: u.email, at: u.at, entries: await readList("d:" + u.id) }); }
+        const out = []; for (const em of (await readList("uidx")).slice(-300)) { const u = JSON.parse((await env.DB.get("u:" + em)) || "null"); if (u) out.push({ id: u.id, name: u.name, email: u.email, at: u.at, verified: u.verified !== false, entries: await readList("d:" + u.id) }); }
         return json(out);
       }
 

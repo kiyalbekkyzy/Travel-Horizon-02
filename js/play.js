@@ -60,24 +60,74 @@
     html: function () { return '<div class="wrap">' + W.head("tDiary", "sDiary") + '<div id="passB"></div></div>'; },
     init: loadDiary });
 
+  var AUTH_ERR = { mail: "dErrMail", pass: "dErrPass", auth: "dErrAuth", used: "dErrUsed", name: "dErrName", unverified: "dUnver", disposable: "dErrDisp", nomx: "dErrNoMx", mail_off: "dErrOff", mail_fail: "dErrSend", "too many": "dErrMany", typo: "dErrTypo" };
+  function showErr(er) {
+    var x = $("aErr"); if (!x) return; var m = AUTH_ERR[er.message] || (er instanceof TypeError ? "dErrNet" : "dErrAuth");
+    x.textContent = t(m) + (er.message === "typo" && er.hint ? " " + er.hint + "?" : ""); x.hidden = false;
+  }
+  function afterIn() {
+    W.closeModal(); loadDiary(); var pa = $("passport"); if (pa) pa.scrollIntoView({ behavior: "smooth" });
+    if (DY.pending) { var c = DY.pending; DY.pending = ""; setTimeout(function () { W.applyStamp(c); }, 500); }
+  }
+  function checkMail(email) { // экран «проверьте почту» с повторной отправкой
+    W.modal('<div class="auth"><h2>' + esc(t("dCheckT")) + '</h2><p>' + esc(t("dCheckP").replace("%s", email)) + '</p><p class="muted small" id="aOk" role="status" aria-live="polite"></p>' +
+      '<button type="button" class="btn ghost full" id="aResend">' + esc(t("dResend")) + '</button><p class="err" id="aErr" role="alert" hidden></p></div>', "narrow");
+    $("aResend").addEventListener("click", function (e) {
+      var b = e.target; b.disabled = true; $("aErr").hidden = true;
+      WTStore.resend(email, W.lang).then(function () { $("aOk").textContent = t("dResent"); setTimeout(function () { b.disabled = false; }, 20000); }).catch(function (er) { b.disabled = false; showErr(er); });
+    });
+  }
+  function forgotModal() {
+    W.modal('<div class="auth"><h2>' + esc(t("dForgotT")) + '</h2><p>' + esc(t("dForgotP")) + '</p><form id="aForm" novalidate><label>' + esc(t("dEmail")) + '<input name="email" type="email" autocomplete="email" inputmode="email"></label>' +
+      '<p class="muted small" id="aOk" role="status" aria-live="polite"></p><p class="err" id="aErr" role="alert" hidden></p><button class="btn full" type="submit">' + esc(t("dSendLink")) + '</button></form>' +
+      '<button type="button" class="link" data-act="dauth" data-m="login">' + esc(t("dBack")) + '</button></div>', "narrow");
+    $("aForm").addEventListener("submit", function (e) {
+      e.preventDefault(); var f = e.target, b = f.querySelector("button"); $("aErr").hidden = true;
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(f.email.value.trim())) { showErr(new Error("mail")); return; }
+      b.disabled = true;
+      WTStore.forgot(f.email.value.trim().toLowerCase(), W.lang).then(function () { $("aOk").textContent = t("dForgotSent"); setTimeout(function () { b.disabled = false; }, 20000); }).catch(function (er) { b.disabled = false; showErr(er); });
+    });
+  }
   function authModal(mode) {
     DY.mode = mode || DY.mode; var reg = DY.mode === "register";
     W.modal('<div class="auth"><h2>' + esc(t(reg ? "dReg" : "dLogin")) + '</h2><form id="aForm" novalidate>' + (reg ? '<label>' + esc(t("dName")) + '<input name="name" autocomplete="name" maxlength="60"></label>' : "") +
       '<label>' + esc(t("dEmail")) + '<input name="email" type="email" autocomplete="email" inputmode="email"></label><label>' + esc(t("dPass")) + '<input name="password" type="password" autocomplete="' + (reg ? "new-password" : "current-password") + '"></label>' +
-      '<p class="err" id="aErr" role="alert" hidden></p><button class="btn full" type="submit">' + esc(t(reg ? "dReg" : "dLogin")) + '</button></form><button type="button" class="link" data-act="dauth" data-m="' + (reg ? "login" : "register") + '">' + esc(t(reg ? "dHave" : "dNo")) + '</button><p class="muted small">' + esc(t("dPriv")) + "</p></div>", "narrow");
+      '<p class="err" id="aErr" role="alert" hidden></p><button type="button" class="link" id="aResend2" hidden>' + esc(t("dResend")) + '</button><button class="btn full" type="submit">' + esc(t(reg ? "dReg" : "dLogin")) + '</button></form>' +
+      (reg ? "" : '<button type="button" class="link" data-act="dforgot">' + esc(t("dForgot")) + '</button> ') +
+      '<button type="button" class="link" data-act="dauth" data-m="' + (reg ? "login" : "register") + '">' + esc(t(reg ? "dHave" : "dNo")) + '</button><p class="muted small">' + esc(t("dPriv")) + "</p></div>", "narrow");
     $("aForm").addEventListener("submit", function (e) {
-      e.preventDefault(); var f = e.target, b = f.querySelector("button");
+      e.preventDefault(); var f = e.target, b = f.querySelector('button[type="submit"]'); $("aErr").hidden = true; $("aResend2").hidden = true;
       b.disabled = true;
-      WTStore.auth(DY.mode, { name: f.name ? f.name.value : "", email: f.email.value, password: f.password.value }).then(function () {
-        W.closeModal(); loadDiary(); var pa = $("passport"); if (pa) pa.scrollIntoView({ behavior: "smooth" });
-        if (DY.pending) { var c = DY.pending; DY.pending = ""; setTimeout(function () { W.applyStamp(c); }, 500); }
+      WTStore.auth(DY.mode, { name: f.name ? f.name.value : "", email: f.email.value, password: f.password.value, lang: W.lang }).then(function (r) {
+        if (r && r.pending) checkMail(r.email); else afterIn();
       }).catch(function (er) {
-        b.disabled = false; var m = { mail: "dErrMail", pass: "dErrPass", auth: "dErrAuth", used: "dErrUsed", name: "dErrName" }[er.message] || "dErrAuth";
-        var x = $("aErr"); x.textContent = t(m); x.hidden = false;
+        b.disabled = false; showErr(er);
+        if (er.message === "unverified") { var rb = $("aResend2"); rb.hidden = false; rb.onclick = function () { checkMail(f.email.value.trim().toLowerCase()); WTStore.resend(f.email.value.trim().toLowerCase(), W.lang).catch(function () {}); }; }
       });
     });
   }
   W.acts.dauth = function (el) { authModal(el.getAttribute("data-m")); };
+  W.acts.dforgot = function () { forgotModal(); };
+
+  // ссылки из писем: ?verify=… (подтверждение почты) и ?reset=… (новый пароль)
+  function cleanUrl() { try { history.replaceState(null, "", location.pathname + "#passport"); } catch (e) {} }
+  function notice(title, text, extra) {
+    W.modal('<div class="auth"><h2>' + esc(title) + '</h2><p>' + esc(text) + '</p>' + (extra || "") + '<button type="button" class="btn full" data-act="mclose">' + esc(t("dOkBtn")) + '</button></div>', "narrow");
+  }
+  function handleMailLink() {
+    var q = new URLSearchParams(location.search), v = q.get("verify"), r = q.get("reset"); if (!v && !r) return; cleanUrl();
+    if (v) {
+      WTStore.verifyEmail(v, W.lang).then(function () { loadDiary(); notice(t("dVerOk"), t("dVerOkP")); })
+        .catch(function () { W.modal('<div class="auth"><h2>' + esc(t("dVerOk")) + '?</h2><p>' + esc(t("dVerBad")) + '</p><button type="button" class="btn full" data-act="dauth" data-m="login">' + esc(t("dLogin")) + '</button></div>', "narrow"); });
+    } else {
+      W.modal('<div class="auth"><h2>' + esc(t("dNewPassT")) + '</h2><form id="aForm" novalidate><label>' + esc(t("dPass")) + '<input name="password" type="password" autocomplete="new-password"></label><p class="err" id="aErr" role="alert" hidden></p><button class="btn full" type="submit">' + esc(t("dSave")) + '</button></form></div>', "narrow");
+      $("aForm").addEventListener("submit", function (e) {
+        e.preventDefault(); var f = e.target, b = f.querySelector("button"); b.disabled = true; $("aErr").hidden = true;
+        WTStore.resetPassword(r, f.password.value, W.lang).then(afterIn).catch(function (er) { b.disabled = false; if (er.message === "token") { $("aErr").textContent = t("dVerBad"); $("aErr").hidden = false; } else showErr(er); });
+      });
+    }
+  }
+  setTimeout(handleMailLink, 600);
   W.acts.dout = function () { WTStore.signOut(); loadDiary(); };
   W.acts.edel = function (el) { if (!confirm(t("dDelQ"))) return; var id = el.getAttribute("data-id"); WTStore.deleteEntry(id).then(function () { DY.list = DY.list.filter(function (x) { return x.id !== id; }); drawDiary(); }); };
 

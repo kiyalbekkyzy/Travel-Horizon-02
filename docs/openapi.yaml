@@ -32,6 +32,11 @@ components:
       in: header
       name: X-Token
   schemas:
+    Session:
+      type: object
+      properties:
+        token: { type: string }
+        user: { type: object, properties: { id: { type: string }, name: { type: string }, email: { type: string } } }
     Lead:
       type: object
       required: [name, country, contact]
@@ -282,26 +287,98 @@ paths:
   /api/auth:
     post:
       tags: [Travellers]
-      summary: Register or sign in a traveller
-      description: Если почты ещё нет — создаётся аккаунт, иначе выполняется вход. Лимит — 15 в час с одного адреса.
+      summary: Register (with email confirmation) or sign in
+      description: |
+        **mode=register** — создаёт аккаунт в статусе «не подтверждён» и отправляет письмо со ссылкой (действует 24 часа).
+        Токен НЕ выдаётся, пока почта не подтверждена (`POST /api/auth/verify`).
+        Адрес проверяется: формат, одноразовые домены, частые опечатки (gmial.com), наличие почтового сервера у домена (DNS MX).
+        Пароль: 8–100 символов, буквы и цифры. Повторная регистрация неподтверждённого адреса отправляет письмо заново.
+
+        **mode=login** — вход; для неподтверждённой почты ответ `403 unverified`.
+
+        Коды ошибок в поле `error`: `mail`, `typo` (+`hint`), `disposable`, `nomx`, `pass`, `name`, `used`, `auth`, `unverified`, `mail_off` (503, не настроена отправка писем), `mail_fail` (502), `too many` (429).
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [email, password]
+              required: [mode, email, password]
               properties:
-                name: { type: string, maxLength: 60 }
+                mode: { type: string, enum: [register, login] }
+                name: { type: string, maxLength: 60, description: "Обязательно при регистрации" }
                 email: { type: string, format: email }
-                password: { type: string, minLength: 6, maxLength: 100 }
+                password: { type: string, minLength: 8, maxLength: 100 }
+                lang: { type: string, enum: [ru, en, zh, es], description: "Язык письма" }
       responses:
         "200":
-          description: Токен для дальнейших запросов
-          content: { application/json: { schema: { type: object, properties: { token: { type: string } } } } }
+          description: При регистрации `{pending:true,email}`, при входе — токен
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties: { pending: { type: boolean }, email: { type: string } }
+                  - { $ref: "#/components/schemas/Session" }
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { description: "Почта не подтверждена (error=unverified)" }
+        "409": { description: "Почта уже зарегистрирована (error=used)" }
         "429": { $ref: "#/components/responses/TooMany" }
+        "502": { description: "Письмо не отправилось (error=mail_fail)" }
+        "503": { description: "Отправка писем не настроена (error=mail_off)" }
+  /api/auth/verify:
+    post:
+      tags: [Travellers]
+      summary: Confirm email by the token from the email link
+      description: Одноразовый токен из ссылки `?verify=…`. Активирует аккаунт, отправляет письмо «Добро пожаловать» и сразу выдаёт токен входа.
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, required: [token], properties: { token: { type: string }, lang: { type: string, enum: [ru, en, zh, es] } } } } }
+      responses:
+        "200": { description: Вход выполнен, content: { application/json: { schema: { $ref: "#/components/schemas/Session" } } } }
+        "400": { description: "Ссылка недействительна или уже использована (error=token)" }
+        "429": { $ref: "#/components/responses/TooMany" }
+  /api/auth/resend:
+    post:
+      tags: [Travellers]
+      summary: Send the confirmation email again
+      description: Всегда отвечает `{ok:true}` (не раскрывает, есть ли адрес). Лимит — 3 письма в час на адрес.
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, required: [email], properties: { email: { type: string, format: email }, lang: { type: string, enum: [ru, en, zh, es] } } } } }
+      responses:
+        "200": { description: OK }
+        "429": { $ref: "#/components/responses/TooMany" }
+  /api/auth/forgot:
+    post:
+      tags: [Travellers]
+      summary: Email a password reset link
+      description: Ссылка `?reset=…` действует 1 час. Всегда отвечает `{ok:true}`.
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, required: [email], properties: { email: { type: string, format: email }, lang: { type: string, enum: [ru, en, zh, es] } } } } }
+      responses:
+        "200": { description: OK }
+        "429": { $ref: "#/components/responses/TooMany" }
+  /api/auth/reset:
+    post:
+      tags: [Travellers]
+      summary: Set a new password by the token from the email
+      description: После смены приходит письмо-уведомление, выдаётся токен входа.
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, required: [token, password], properties: { token: { type: string }, password: { type: string, minLength: 8, maxLength: 100 }, lang: { type: string, enum: [ru, en, zh, es] } } } } }
+      responses:
+        "200": { description: Вход выполнен, content: { application/json: { schema: { $ref: "#/components/schemas/Session" } } } }
+        "400": { description: "error=token (ссылка устарела) или error=pass (слабый пароль)" }
+  /api/auth/logout:
+    post:
+      tags: [Travellers]
+      summary: Sign out (invalidate the token)
+      security: [{ TravellerToken: [] }]
+      responses:
+        "200": { description: OK }
   /api/diary:
     get:
       tags: [Travellers]

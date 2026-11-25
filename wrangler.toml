@@ -18,7 +18,11 @@ binding = "AI"
 [vars]
 # Адрес сайта на GitHub Pages (только домен, без пути). Для тестов можно "*".
 ALLOWED_ORIGIN = "https://kiyalbekkyzy.github.io"
+# Адрес сайта: на него ведут ссылки в письмах (со слэшем в конце).
+SITE_URL = "https://kiyalbekkyzy.github.io/Travel-Horizon-02/"
 
 # Секреты НЕ хранятся в репозитории. Задаются в Cloudflare: Worker → Settings → Variables and Secrets:
 #   ADMIN_PASSWORD — пароль админки
 #   BOT_TOKEN, CHAT_ID — Telegram-бот для уведомлений о заявках (необязательно)
+#   BREVO_API_KEY (Secret) — ключ почтового сервиса Brevo для писем подтверждения (бесплатно 300 писем/день)
+#   MAIL_FROM — адрес-отправитель, подтверждённый в Brevo (Text);  MAIL_FROM_NAME — имя отправителя (необязательно)

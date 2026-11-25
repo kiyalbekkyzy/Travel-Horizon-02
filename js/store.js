@@ -33,6 +33,12 @@
   }
 
   function jsonLs(k) { var l = []; try { l = JSON.parse(lsGet(k) || "[]"); } catch (e) {} return l; }
+  function passOk(p) { return p.length >= 8 && p.length <= 100 && /[A-Za-z\u0400-\u04FF]/.test(p) && /\d/.test(p); }
+  function post(path, body) {
+    return fetch(API + path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) { var e = new Error(j.error || (r.status === 429 ? "too many" : "auth")); e.hint = j.hint; throw e; } return j; }); });
+  }
+  function keep(j) { lsSet("wt_token", j.token); lsSet("wt_user", JSON.stringify(j.user)); return j.user; }
   function usersLocal() { var o = {}; try { o = JSON.parse(lsGet("wt_users_v3") || "{}"); } catch (e) {} return o; }
   function sha(t) { return crypto.subtle.digest("SHA-256", new TextEncoder().encode(t)).then(function (b) { return Array.prototype.map.call(new Uint8Array(b), function (x) { return ("0" + x.toString(16)).slice(-2); }).join(""); }); }
   function leadsLocal() { var l = []; try { l = JSON.parse(lsGet(LS_LEADS) || "[]"); } catch (e) {} return l; }
@@ -116,12 +122,11 @@
     auth: function (mode, d) {
       var email = String(d.email || "").trim().toLowerCase(), pass = String(d.password || ""), name = String(d.name || "").trim();
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return Promise.reject(new Error("mail"));
-      if (pass.length < 6) return Promise.reject(new Error("pass"));
+      if (mode === "register" ? !passOk(pass) : pass.length < 1) return Promise.reject(new Error("pass"));
       if (mode === "register" && name.length < 1) return Promise.reject(new Error("name"));
       if (API) {
-        return fetch(API + "/api/auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mode: mode, name: name, email: email, password: pass }) })
-          .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || "auth"); return j; }); })
-          .then(function (j) { lsSet("wt_token", j.token); lsSet("wt_user", JSON.stringify(j.user)); return j.user; });
+        return post("/api/auth", { mode: mode, name: name, email: email, password: pass, lang: d.lang })
+          .then(function (j) { if (j.pending) return { pending: true, email: j.email }; return keep(j); });
       }
       var users = usersLocal(), found = null; Object.keys(users).forEach(function (k) { if (users[k].email === email) found = users[k]; });
       if (mode === "register") {
@@ -132,7 +137,12 @@
       if (!found) return Promise.reject(new Error("auth"));
       return sha(found.salt + pass).then(function (h) { if (h !== found.hash) throw new Error("auth"); lsSet("wt_session", found.id); return { id: found.id, name: found.name, email: found.email }; });
     },
-    signOut: function () { try { localStorage.removeItem("wt_session"); localStorage.removeItem("wt_token"); localStorage.removeItem("wt_user"); } catch (e) {} },
+    verifyEmail: function (token, lang) { return post("/api/auth/verify", { token: token, lang: lang }).then(keep); },
+    resend: function (email, lang) { return post("/api/auth/resend", { email: email, lang: lang }); },
+    forgot: function (email, lang) { return post("/api/auth/forgot", { email: email, lang: lang }); },
+    resetPassword: function (token, password, lang) { if (!passOk(password)) return Promise.reject(new Error("pass")); return post("/api/auth/reset", { token: token, password: password, lang: lang }).then(keep); },
+    signOut: function () {
+      if (API) { try { fetch(API + "/api/auth/logout", { method: "POST", headers: { "X-Token": lsGet("wt_token") || "" } }); } catch (e) {} } try { localStorage.removeItem("wt_session"); localStorage.removeItem("wt_token"); localStorage.removeItem("wt_user"); } catch (e) {} },
     getDiary: function () {
       if (API) return fetch(API + "/api/diary", { headers: { "X-Token": lsGet("wt_token") || "" } }).then(function (r) { if (!r.ok) throw new Error("auth"); return r.json(); });
       var u = Store.me(); return Promise.resolve(u ? jsonLs("wt_diary_" + u.id) : []);
