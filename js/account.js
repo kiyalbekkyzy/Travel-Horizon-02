@@ -12,7 +12,7 @@
   /* ---------- шапка: «Войти» или аватар ---------- */
   function drawBtn() {
     var b = $("accBtn"); if (!b) return; var u = me();
-    if (!WTStore.hasApi) { b.hidden = true; return; } // кабинет нужен серверу: в демо-режиме скрыт
+    if (!((window.WT_CONFIG || {}).API_URL)) { b.hidden = true; return; } // кабинет нужен серверу: в демо-режиме скрыт
     b.hidden = false;
     if (u) { b.className = "acc-btn in"; b.setAttribute("aria-label", t("acTitle")); b.innerHTML = '<span class="acc-av">' + esc((u.name || "?").trim().charAt(0).toUpperCase()) + '</span><span class="acc-nm">' + esc(u.name.split(" ")[0]) + "</span>"; }
     else { b.className = "acc-btn out btn small glass-btn"; b.removeAttribute("aria-label"); b.textContent = t("dLogin"); }
