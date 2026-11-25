@@ -89,7 +89,8 @@
     /* ---------- заявки: статус new → progress → done ---------- */
     submitLead: function (lead) {
       if (API) {
-        return fetch(API + "/api/lead", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(lead) })
+        var h = { "Content-Type": "application/json" }, tk = lsGet("wt_token"); if (tk) h["X-Token"] = tk; // с токеном заявка попадёт в историю кабинета
+        return fetch(API + "/api/lead", { method: "POST", headers: h, body: JSON.stringify(lead) })
           .then(function (r) { if (!r.ok) throw new Error("send"); });
       }
       var list = leadsLocal();
@@ -137,6 +138,23 @@
       if (!found) return Promise.reject(new Error("auth"));
       return sha(found.salt + pass).then(function (h) { if (h !== found.hash) throw new Error("auth"); lsSet("wt_session", found.id); return { id: found.id, name: found.name, email: found.email }; });
     },
+    /* ---------- личный кабинет (нужен API) ---------- */
+    acct: function (method, path, body) {
+      return fetch(API + path, { method: method, headers: { "Content-Type": "application/json", "X-Token": lsGet("wt_token") || "" }, body: body ? JSON.stringify(body) : undefined })
+        .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) { var e = new Error(j.error || (r.status === 401 ? "auth" : "server")); e.status = r.status; throw e; } return j; }); });
+    },
+    refreshMe: function () { return Store.acct("GET", "/api/me").then(function (u) { lsSet("wt_user", JSON.stringify(u)); return u; }); },
+    updateMe: function (patch) { return Store.acct("PATCH", "/api/me", patch).then(function (u) { lsSet("wt_user", JSON.stringify(u)); return u; }); },
+    changePassword: function (o, n, lang) { if (!passOk(n)) return Promise.reject(new Error("pass")); return Store.acct("POST", "/api/me/password", { old: o, password: n, lang: lang }); },
+    changeEmail: function (email, password, lang) { return Store.acct("POST", "/api/me/email", { email: String(email || "").trim().toLowerCase(), password: password, lang: lang }); },
+    confirmEmail: function (token, lang) { return post("/api/auth/confirm-email", { token: token, lang: lang }).then(keep); },
+    deleteAccount: function (password) { return Store.acct("DELETE", "/api/me", { password: password }).then(function () { Store.signOut(); }); },
+    trips: function () { return Store.acct("GET", "/api/trips"); },
+    addTrip: function (t) { return Store.acct("POST", "/api/trips", t); },
+    patchTrip: function (id, t) { return Store.acct("PATCH", "/api/trips/" + encodeURIComponent(id), t); },
+    deleteTrip: function (id) { return Store.acct("DELETE", "/api/trips/" + encodeURIComponent(id)); },
+    history: function () { return Store.acct("GET", "/api/history"); },
+    hasApi: !!API,
     verifyEmail: function (token, lang) { return post("/api/auth/verify", { token: token, lang: lang }).then(keep); },
     resend: function (email, lang) { return post("/api/auth/resend", { email: email, lang: lang }); },
     forgot: function (email, lang) { return post("/api/auth/forgot", { email: email, lang: lang }); },
